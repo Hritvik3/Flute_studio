@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flute Studio — Split · Mix · Master</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">🎐</span>
+    <div>
+      <h1>Flute Studio</h1>
+      <p class="tagline">Split · Mix · Master</p>
+    </div>
+  </div>
+  <div class="device-pill" id="devicePill">…</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="library">Library</button>
+  <button class="tab" data-tab="separate">1 · Separate</button>
+  <button class="tab" data-tab="mix">2 · Mix</button>
+  <button class="tab" data-tab="master">3 · Master</button>
+  <button class="tab" data-tab="jobs">Jobs</button>
+</nav>
+
+<main>
+
+  <!-- ================= LIBRARY ================= -->
+  <section id="tab-library" class="panel active">
+    <div class="card">
+      <h2>Upload audio</h2>
+      <p class="hint">WAV · MP3 · M4A · FLAC · AAC · OGG · OPUS — up to 500 MB</p>
+      <div class="dropzone" id="dropzone">
+        <p><strong>Drop files here</strong> or click to browse</p>
+        <input type="file" id="fileInput" multiple
+               accept=".wav,.mp3,.m4a,.flac,.aac,.ogg,.opus" hidden>
+      </div>
+      <div id="uploadStatus" class="hint"></div>
+    </div>
+
+    <div class="card">
+      <h2>Library <span class="count" id="libraryCount"></span></h2>
+      <div id="libraryList" class="file-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= SEPARATE ================= -->
+  <section id="tab-separate" class="panel">
+    <div class="card">
+      <h2>Stem separation</h2>
+      <p class="hint">Demucs splits a song into stems (drums, bass, other, vocals,
+        and with the 6-stem model also guitar &amp; piano). GPU is used when available.</p>
+
+      <label class="field">
+        <span>Source track</span>
+        <select id="sepSource"></select>
+      </label>
+
+      <label class="field">
+        <span>Model</span>
+        <select id="sepModel"></select>
+      </label>
+
+      <button class="primary" id="sepRun">Separate</button>
+
+      <div class="progress-wrap hidden" id="sepProgressWrap">
+        <div class="progress"><div class="bar" id="sepBar"></div></div>
+        <p class="hint" id="sepStage"></p>
+      </div>
+    </div>
+
+    <div class="card hidden" id="sepResults">
+      <h2>Resulting stems</h2>
+      <p class="hint" id="sepResultMeta"></p>
+      <div id="sepStems" class="stem-grid"></div>
+      <button class="ghost" id="sepToMix">⬆ Send stems to Mixer</button>
+    </div>
+  </section>
+
+  <!-- ================= MIX ================= -->
+  <section id="tab-mix" class="panel">
+    <div class="card">
+      <h2>Mixer</h2>
+      <p class="hint">Balance stems, add your processed flute, then render a mix.
+        Solo/mute, gain and pan per track.</p>
+
+      <div class="row">
+        <label class="field grow">
+          <span>Add track</span>
+          <select id="mixSource"></select>
+        </label>
+        <button class="ghost" id="mixAdd">Add</button>
+      </div>
+
+      <div id="mixTracks" class="track-list"></div>
+
+      <div class="master-bus">
+        <h3>Master bus</h3>
+        <div class="grid-4">
+          <label class="field">
+            <span>Master gain <b id="mixGainVal">0.0 dB</b></span>
+            <input type="range" id="mixGain" min="-24" max="12" step="0.5" value="0">
+          </label>
+          <label class="field">
+            <span>Target LUFS <b id="mixLufsVal">off</b></span>
+            <input type="range" id="mixLufs" min="-24" max="-6" step="0.5" value="-14">
+            <input type="checkbox" id="mixLufsOn"> enable
+          </label>
+          <label class="field">
+            <span>Ceiling <b id="mixCeilVal">-1.0 dB</b></span>
+            <input type="range" id="mixCeil" min="-6" max="-0.1" step="0.1" value="-1">
+          </label>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" id="mixName" placeholder="final_mix">
+          </label>
+        </div>
+      </div>
+
+      <button class="primary" id="mixRun">Render mix</button>
+
+      <div class="progress-wrap hidden" id="mixProgressWrap">
+        <div class="progress"><div class="bar" id="mixBar"></div></div>
+        <p class="hint" id="mixStage"></p>
+      </div>
+    </div>
+
+    <div class="card hidden" id="mixResult">
+      <h2>Mix result</h2>
+      <div id="mixResultBody"></div>
+    </div>
+  </section>
+
+  <!-- ================= MASTER ================= -->
+  <section id="tab-master" class="panel">
+    <div class="card">
+      <h2>Mastering chain</h2>
+      <p class="hint">Adaptive EQ · compression · saturation · reverb · delay ·
+        stereo · limiter · LUFS normalization, with optional reference matching.</p>
+
+      <div class="grid-2">
+        <label class="field">
+          <span>Source</span>
+          <select id="masterSource"></select>
+        </label>
+        <label class="field">
+          <span>Style</span>
+          <select id="masterStyle"></select>
+        </label>
+        <label class="field">
+          <span>Reference (optional)</span>
+          <select id="masterRef"></select>
+        </label>
+        <label class="field">
+          <span>Reference match <b id="masterMatchVal">0%</b></span>
+          <input type="range" id="masterMatch" min="0" max="100" step="5" value="0">
+        </label>
+      </div>
+
+      <details class="advanced" open>
+        <summary>Fine controls</summary>
+        <div class="grid-3">
+          <label class="field">
+            <span>Reverb <b id="masterRevVal">style</b></span>
+            <input type="range" id="masterRev" min="0" max="60" step="1" value="15">
+            <input type="checkbox" id="masterRevAuto" checked> follow style
+          </label>
+          <label class="field">
+            <span>Delay <b id="masterDelVal">style</b></span>
+            <input type="range" id="masterDel" min="0" max="40" step="1" value="4">
+            <input type="checkbox" id="masterDelAuto" checked> follow style
+          </label>
+          <label class="field">
+            <span>Stereo width <b id="masterWidthVal">1.12</b></span>
+            <input type="range" id="masterWidth" min="0.6" max="1.5" step="0.01" value="1.12">
+          </label>
+          <label class="field">
+            <span>Target LUFS <b id="masterLufsVal">-14.0</b></span>
+            <input type="range" id="masterLufs" min="-24" max="-6" step="0.5" value="-14">
+          </label>
+          <label class="field">
+            <span>Peak ceiling <b id="masterCeilVal">-1.0 dB</b></span>
+            <input type="range" id="masterCeil" min="-6" max="-0.1" step="0.1" value="-1">
+          </label>
+          <label class="field">
+            <span>Output name</span>
+            <input type="text" id="masterName" placeholder="auto">
+          </label>
+        </div>
+
+        <div class="toggles" id="masterToggles">
+          <label><input type="checkbox" data-fx="use_eq" checked> EQ</label>
+          <label><input type="checkbox" data-fx="use_compression" checked> Compression</label>
+          <label><input type="checkbox" data-fx="use_saturation" checked> Saturation</label>
+          <label><input type="checkbox" data-fx="use_reverb" checked> Reverb</label>
+          <label><input type="checkbox" data-fx="use_delay" checked> Delay</label>
+          <label><input type="checkbox" data-fx="use_stereo" checked> Stereo</label>
+          <label><input type="checkbox" data-fx="use_limiter" checked> Limiter</label>
+        </div>
+      </details>
+
+      <button class="primary" id="masterRun">Render master</button>
+
+      <div class="progress-wrap hidden" id="masterProgressWrap">
+        <div class="progress"><div class="bar" id="masterBar"></div></div>
+        <p class="hint" id="masterStage"></p>
+      </div>
+    </div>
+
+    <div class="card hidden" id="masterResult">
+      <h2>Master result</h2>
+      <div id="masterResultBody"></div>
+    </div>
+  </section>
+
+  <!-- ================= JOBS ================= -->
+  <section id="tab-jobs" class="panel">
+    <div class="card">
+      <h2>Jobs</h2>
+      <div id="jobsList" class="job-list"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  Flute Studio — DSP engine: <code>flute_processor.py</code> ·
+  Separation: Demucs <code>htdemucs</code>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------
+# Flute Studio — git ignore
+# ---------------------------------------------------------------
+
+# ---------- audio data (NEVER commit: uploads, stems, renders) ----------
+data/
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.aac
+*.ogg
+*.opus
+*.aiff
+*.wma
+*.zpa
+
+# ---------- python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# ---------- build / packaging ----------
+build/
+dist/
+sdist/
+wheels/
+*.egg-info/
+.eggs/
+
+# ---------- tooling ----------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ---------- editors / OS ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- logs / env ----------
+*.log
+.env
+.env.*
+!.env.example

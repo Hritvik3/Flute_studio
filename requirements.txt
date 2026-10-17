@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+
+numpy
+scipy
+librosa
+soundfile
+pyloudnorm
+
+# Stem separation (CPU or GPU). The CUDA build of torch is optional;
+# demucs works on CPU if torch is installed without CUDA.
+demucs
+torch
